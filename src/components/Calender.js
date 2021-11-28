@@ -41,10 +41,11 @@ const Calender = ({date}) => {
                 leapYear = true;
             }
         }
-        let prevMonthDays = [];
-        let nowMonthDays = [];
-        let nextMonthDays = [];
         
+        let nowMonthDays = [];
+        let cnt = 7 - now_YMD_Obj.getDay();
+        let weekArr = [cnt];
+
         let endOfDay = 31;
         if(month31.indexOf(month+1) > -1)
             endOfDay = 30;
@@ -54,29 +55,75 @@ const Calender = ({date}) => {
             else
                 endOfDay = 28;
         }
-
-        for(let i = 1; i <= endOfDay; i++) {
-            nowMonthDays.push(i);
-        }
         
+        let prevEndOfDay = 31;
         if(month31.indexOf(month) > -1) {
-            console.log("if ",month);
-            endOfDay = 30;
+            prevEndOfDay = 30;
         } else if(month-1 === 2) {
-            endOfDay = leapYear ? 29 : 28;
-        } else {
-            endOfDay = 31;
+            prevEndOfDay = leapYear ? 29 : 28;
         }
-
         // 현재 월에 첫 날짜의 숫자를 가져와 필요한 만큼 전월 일자 채우기
         const nowMonthFirstDay = now_YMD_Obj.getDay();
-        for(let i = endOfDay; ; i--) {
-            if(prevMonthDays.length >= nowMonthFirstDay)
+        for(let i = prevEndOfDay; i > prevEndOfDay - 7; i--) {
+            if(nowMonthDays.length >= nowMonthFirstDay)
                 break;
-            prevMonthDays.push(i);
+            nowMonthDays.push(i);
         }
-        console.log("nowMonthDays", nowMonthDays);
-        console.log("prevMonthDays", prevMonthDays);
+
+        let wd_arr = [];
+        for(let i = 1; i <= endOfDay; i++) {
+            if(i === cnt) {
+                cnt += 7;
+                if(cnt < 32) {
+                    weekArr.push(cnt);
+                }
+            }
+            nowMonthDays.push(i);
+            if(nowMonthDays.length === 7) {
+                wd_arr.push(nowMonthDays);
+                nowMonthDays = [];
+            }
+        }
+        for(let i = 1; nowMonthDays.length < 7; i++)
+            nowMonthDays.push(i);
+            
+        wd_arr.push(nowMonthDays);
+        
+        let nowCalender = wd_arr.map((arr, idx) => {
+            console.log(arr, idx)
+            return (
+                <Row key={arr+idx}>
+                    {arr.map((day, i) => {
+                        return (
+                            <div style={{
+                                border: "1px solid black",
+                            }} key={i}>
+                                {idx === 0 && day > 7 ?
+                                    <span style={{
+                                        opacity: 0.5
+                                    }}>
+                                         {day}
+                                    </span>  : 
+                                    idx > 3 && day < 7 ?  
+                                    <span style={{
+                                        opacity: 0.5
+                                    }}>
+                                        {day}
+                                    </span>  :
+                                    <span style={{
+                                        color: 'black',
+                                    }}>
+                                        {day}
+                                    </span>
+                                }
+                                
+                            </div>
+                        );
+                    })}
+                </Row>
+            );
+        })
+        return nowCalender;
     };
 
     useEffect(() => {
@@ -99,7 +146,6 @@ const Calender = ({date}) => {
                 temp.push(i);
             }
         }
-        console.log("temp: ",temp);
         setDays(temp);
     }
 
@@ -114,15 +160,16 @@ const Calender = ({date}) => {
             </Header>
             <Days>
                 <Day>
-                    <div>일</div>
-                    <div>월</div>
-                    <div>화</div>
-                    <div>수</div>
-                    <div>목</div>
-                    <div>금</div>
-                    <div>토</div>
+                    <div style={{color: 'red'}}>일</div>
+                    <div style={{color: 'black'}}>월</div>
+                    <div style={{color: 'black'}}>화</div>
+                    <div style={{color: 'black'}}>수</div>
+                    <div style={{color: 'black'}}>목</div>
+                    <div style={{color: 'black'}}>금</div>
+                    <div style={{color: 'blue'}}>토</div>
                 </Day>
-                    달력자리 {makeCalender(viewYear, viewMonth)}
+                    <br /><br />
+                    {makeCalender(viewYear, viewMonth)}
             </Days>
 
             <FloatBtn1 onClick={() => console.log("1번째 버튼 클릭")}>
@@ -187,7 +234,7 @@ const Day = styled.div`
   width: 100%;
   box-sizing: border-box;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   & div {
     min-width: 13%;
     max-height: 5%;
@@ -201,7 +248,7 @@ const Row = styled.div`
   width: 100%;
   height: 16%;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   & div {
     width: 13%;
     height: 100%;
@@ -220,8 +267,8 @@ const FloatBtn1 = styled.button`
   box-shadow: 0 1px 2px 0 #777;
   position: fixed;
   z-index: 999;
-  right: 6%;
-  bottom: 18%;
+  right: 30%;
+  bottom: 8%;
   width: 18%;
   min-width: 80px;
   max-width: 130px;
@@ -240,8 +287,8 @@ const FloatBtn2 = styled.button`
   box-shadow: 0 1px 2px 0 #777;
   position: fixed;
   z-index: 999;
-  right: 6%;
-  bottom: 10%;
+  right: 20%;
+  bottom: 8%;
   width: 18%;
   min-width: 80px;
   max-width: 130px;

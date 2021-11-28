@@ -2,12 +2,12 @@ import logo from './logo.svg';
 import './App.css';
 import Calender from './components/Calender';
 
-const date = new Date();
+// const date = new Date();
 
 function App() {
   return (
     <div className="App">
-      <Calender date={date}/>
+      <Calender />
     </div>
   );
 }
