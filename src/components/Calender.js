@@ -105,7 +105,7 @@ const Calender = ({date}) => {
                                          {day}
                                     </span>  : 
                                     idx > 3 && day < 7 ?  
-                                    <span style={{
+                                    <span style={{ 
                                         opacity: 0.5
                                     }}>
                                         {day}
