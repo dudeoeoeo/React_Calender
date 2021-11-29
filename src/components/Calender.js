@@ -4,6 +4,8 @@ import styled, { keyframes, css } from "styled-components";
 const date1 = new Date();
 const month31 = [4, 6, 9, 11];
 const dayToKor = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+const chunsik = "https://post-phinf.pstatic.net/MjAyMTA0MTJfMTAw/MDAxNjE4MjMwMjQ0Mjcy.UcHomwacpcXaJ8_nUksje4UkxE7UOzZ0gcgdZTnl0eEg.hh6qgDmsklQHWhuV2cyTqb6T0CyRF_IxNxy4RseU95Ag.JPEG/IMG_2379.jpg";
+const today_chunsik = "https://img4.yna.co.kr/etc/inner/KR/2021/08/20/AKR20210820141400017_01_i_P4.jpg";
 // 2 4 6 9 11
 // 1 3 5 8 10
 const Calender = ({date}) => {
@@ -88,33 +90,45 @@ const Calender = ({date}) => {
             nowMonthDays.push(i);
             
         wd_arr.push(nowMonthDays);
-        
+        cnt = -now_YMD_Obj.getDay();
         let nowCalender = wd_arr.map((arr, idx) => {
-            console.log(arr, idx)
             return (
                 <Row key={arr+idx}>
                     {arr.map((day, i) => {
+                        cnt += 1;
                         return (
                             <div style={{
                                 border: "1px solid black",
-                            }} key={i}>
+                                backgroundImage: cnt === date1.getDate() ? `url(${today_chunsik})` : `url(${chunsik})`,
+                                backgroundSize: 'contain',
+                                backgroundPosition: 'center',
+                                backgroundRepeat: 'no-repeat',
+                                cursor: 'pointer'
+                            }} 
+                            key={i+cnt}
+                            onClick={() => console.log(1)}
+                            >
                                 {idx === 0 && day > 7 ?
                                     <span style={{
-                                        opacity: 0.5
+                                        opacity: 0.5,
+                                        color: 'black'
                                     }}>
                                          {day}
                                     </span>  : 
                                     idx > 3 && day < 7 ?  
                                     <span style={{ 
-                                        opacity: 0.5
+                                        opacity: 0.5,
+                                        color: 'black'
                                     }}>
                                         {day}
-                                    </span>  :
-                                    <span style={{
-                                        color: 'black',
-                                    }}>
+                                    </span>  : 
+                                    date1.getDate() === day ? 
+                                    <TodayCss style={{fontSize: 20}}>
                                         {day}
-                                    </span>
+                                    </TodayCss> :
+                                    <DayCss>
+                                        {day}
+                                    </DayCss>
                                 }
                                 
                             </div>
@@ -181,6 +195,15 @@ const Calender = ({date}) => {
         </Container>
     );
 };
+
+const DayCss = styled.span`
+    color: #A33CD6
+`;
+const TodayCss = styled.span`
+    color: #000000;
+    font-size: 20px;
+`;
+
 
 const Container = styled.div`
   width: 100vw;
@@ -260,6 +283,8 @@ const Row = styled.div`
   & span {
     margin: 3px 0 0 3px;
     font-size: 0.8em;
+    justify-content: flex-start;
+    margin-right: 80%;
   }
 `;
 
