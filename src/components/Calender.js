@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import styled, { keyframes, css } from "styled-components";
 
 const date1 = new Date();
@@ -23,6 +25,12 @@ const Calender = ({date}) => {
         fontSize: "0.5em",
         cursor:"pointer",
     };
+    
+    const state = useSelector(state => state.calendar);
+    const dispatch = useDispatch();
+    console.log("state schedules: ", state.schedules[0]);
+    console.log("state thisMonth: ", state.thisMonth);
+    console.log("state year: ", state.year);
 
     const [viewYear, setViewYear] = useState();
     const [viewMonth, setViewMonth] = useState();
@@ -166,11 +174,11 @@ const Calender = ({date}) => {
     return (
         <Container>
             <Header>
-                <button onClick={() => console.log("prev")}>◀</button>
+                <button onClick={() => dispatch({type: 'PREV_MONTH'})}>◀</button>
                 <span>
                     {`${dayToKor[viewDay]} ${viewMonth+1}월 ${viewYear}년`}
                 </span>
-                <button onClick={() => console.log("next")}>▶</button>
+                <button onClick={() => dispatch({type: 'NEXT_MONTH'})}>▶</button>
             </Header>
             <Days>
                 <Day>
