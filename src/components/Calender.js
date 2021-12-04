@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useCallback, useEffect, useState } from 'react';
+import { connect, useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import styled, { keyframes, css } from "styled-components";
+import { nextMonth, prevMonth } from "../modules/calender";
 
 const date1 = new Date();
 const month31 = [4, 6, 9, 11];
@@ -26,16 +27,36 @@ const Calender = ({date}) => {
         cursor:"pointer",
     };
     
-    const state = useSelector(state => state.calendar);
+    const state = useSelector(state => state);
     const dispatch = useDispatch();
-    console.log("state schedules: ", state.schedules[0]);
-    console.log("state thisMonth: ", state.thisMonth);
-    console.log("state year: ", state.year);
+    console.log(state);
+    console.log(`month: ${state.calendar.thisMonth}, year: ${state.calendar.year}`);
+    console.log("day: ", new Date().getDate(), new Date().getDay());
+    const prevMonthClick = useCallback((month) => dispatch(prevMonth(month - 1)), [dispatch]);
+    const nextMonthClick = useCallback((month) => dispatch(nextMonth(month + 1)), [dispatch]);
 
     const [viewYear, setViewYear] = useState();
     const [viewMonth, setViewMonth] = useState();
     const [viewDay, setViewDay] = useState();
     const [days, setDays] = useState([]);
+    useEffect(() => {
+        setViewYear(state.calendar.year);
+        setViewMonth(state.calendar.thisMonth);
+        setViewDay(state.calendar.date);
+        // let start = new Date(date1.getFullYear(), date1.getMonth(), 1);
+        // getDays(date1.getMonth());
+    }, [dispatch, state.calendar.date, state.calendar.day, state.calendar.thisMonth, state.calendar.year]);
+
+    const getDays = (month) => {
+        const temp = [];
+        if(month + 1 !== 2) {
+            const endDate = month31.indexOf(month+1) > -1 ? 31 : 30;
+            for(let i = 1; i < endDate + 1; i++) {
+                temp.push(i);
+            }
+        }
+        setDays(temp);
+    }
 
     const makeCalender = (year, month) => {
         // 현재 월이 전년도나 내년으로 넘어가면 체크해줘야 함
@@ -148,37 +169,14 @@ const Calender = ({date}) => {
         return nowCalender;
     };
 
-    useEffect(() => {
-        setViewYear(date1.getFullYear());
-        setViewMonth(date1.getMonth());
-        setViewDay(date1.getDay());
-        let start = new Date(date1.getFullYear(), date1.getMonth(), 1);
-        console.log("date1:",date1);
-        console.log("date1 month:",date1.getMonth());
-        console.log("start: ",start.getDay());
-        console.log("day:", date1.getDate());
-        getDays(date1.getMonth());
-    }, []);
-
-    const getDays = (month) => {
-        const temp = [];
-        if(month + 1 !== 2) {
-            const endDate = month31.indexOf(month+1) > -1 ? 31 : 30;
-            for(let i = 1; i < endDate + 1; i++) {
-                temp.push(i);
-            }
-        }
-        setDays(temp);
-    }
-
     return (
         <Container>
             <Header>
-                <button onClick={() => dispatch({type: 'PREV_MONTH'})}>◀</button>
+                <button onClick={prevMonthClick}>◀</button>
                 <span>
-                    {`${dayToKor[viewDay]} ${viewMonth+1}월 ${viewYear}년`}
+                    {`${dayToKor[viewDay]} ${viewMonth}월 ${viewYear}년`}
                 </span>
-                <button onClick={() => dispatch({type: 'NEXT_MONTH'})}>▶</button>
+                <button onClick={nextMonthClick}>▶</button>
             </Header>
             <Days>
                 <Day>
@@ -344,33 +342,3 @@ const FloatBtn2 = styled.button`
 `;
 
 export default Calender;
-
-
-{/* <div>
-    <div className="calendar">
-        <div className="header">
-            <div className="year-month">
-                {viewYear}년 {viewMonth}월
-                <div className="nav">
-                    <button className="nav-btn go-prev">&lt;</button>
-                    <button className="nav-btn go-today">Today</button>
-                    <button className="nav-btn go-next">&gt;</button>
-                </div>
-            </div>
-            <div className="main">
-                <div className="days">
-                    <div className="day">일</div>
-                    <div className="day">월</div>
-                    <div className="day">화</div>
-                    <div className="day">수</div>
-                    <div className="day">목</div>
-                    <div className="day">금</div>
-                    <div className="day">토</div>
-                    {days}
-                </div>
-                <div className="dates"></div>
-            </div>
-        </div>
-    </div>
-    
-</div> */}

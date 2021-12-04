@@ -4,10 +4,14 @@ const PREV_MONTH = "calendar/PREV_MONTH";
 const NEXT_MONTH = "calendar/NEXT_MONTH";
 const ADD_SCHEDULE = "calendar/ADD_SCHEDULE";
 
+const date = new Date();
+
 const initialState = {
     
-    thisMonth: 10,
-    year: 2021,
+    thisMonth: date.getMonth(),
+    year: date.getFullYear(),
+    day: date.getDay(),
+    date: date.getDate(),
     schedules: [
         {date: "2021-11-25", desc: "달력 만들기", completed: false},
         {date: "2021-11-28", desc: "놀기", completed: true},
@@ -35,13 +39,13 @@ export default function reducer(state = initialState, action) {
             return state;
         }
         case "calendar/PREV_MONTH": {
-            if(state.thisMonth === 1) {
+            if(state.thisMonth <= 1) {
                 return {...state, thisMonth: state.thisMonth+11, year: state.year - 1};
             } 
             return {...state, thisMonth: state.thisMonth-1};
         }
         case "calendar/NEXT_MONTH": {
-            if(state.thisMonth === 11) {
+            if(state.thisMonth >= 11) {
                 return {...state, thisMonth: state.thisMonth - 10, year: state.year + 1};
             }
             return {...state, thisMonth: state.thisMonth + 1};
