@@ -28,24 +28,36 @@ const Calender = ({date}) => {
     };
     
     const state = useSelector(state => state);
+    const calendarDate = useSelector(state => state.calendar);
     const dispatch = useDispatch();
-    console.log(state);
+    // console.log(state);
     console.log(`month: ${state.calendar.thisMonth}, year: ${state.calendar.year}`);
     console.log("day: ", new Date().getDate(), new Date().getDay());
     const prevMonthClick = useCallback((month) => dispatch(prevMonth(month - 1)), [dispatch]);
     const nextMonthClick = useCallback((month) => dispatch(nextMonth(month + 1)), [dispatch]);
-
+    
     const [viewYear, setViewYear] = useState();
     const [viewMonth, setViewMonth] = useState();
     const [viewDay, setViewDay] = useState();
-    const [days, setDays] = useState([]);
+    const [viewDate, setViewDate] = useState();
+    const [dayArr, setDayArr] = useState([]);
+    const [viewCalendar, setViewCalendar] = useState();
     useEffect(() => {
-        setViewYear(state.calendar.year);
-        setViewMonth(state.calendar.thisMonth);
-        setViewDay(state.calendar.date);
+        setViewYear(calendarDate.year);
+        setViewMonth(calendarDate.thisMonth);
+        setViewDay(new Date(calendarDate.year, calendarDate.thisMonth, calendarDate.date).getDay());
+        setViewDate(calendarDate.date);
+
+        getCalendar(calendarDate.year, calendarDate.thisMonth, calendarDate.day, calendarDate.date);
+        // for(let i = 0; i < 13; i++) {
+        //     console.log(new Date(2021, i, 0), "index: ", i);
+        // }
         // let start = new Date(date1.getFullYear(), date1.getMonth(), 1);
         // getDays(date1.getMonth());
-    }, [dispatch, state.calendar.date, state.calendar.day, state.calendar.thisMonth, state.calendar.year]);
+        // console.log("day: ", new Date(state.calendar.year, state.calendar.thisMonth, state.calendar.date).getDay())
+        // console.log("prev",getPrevDay(state.calendar.year, state.calendar.thisMonth, state.calendar.day))
+        // console.log("next",getNextDay(state.calendar.year, state.calendar.thisMonth, state.calendar.date))
+    }, [dispatch, state, calendarDate]);
 
     const getDays = (month) => {
         const temp = [];
@@ -55,23 +67,66 @@ const Calender = ({date}) => {
                 temp.push(i);
             }
         }
-        setDays(temp);
+        // setDays(temp);
     }
 
-    const makeCalender = (year, month) => {
+    const leapYearBool = (year) => {
+        if (year % 4 === 0) {
+            if (year % 100 === 0 && year % 400 === 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+    const getPrevDay = (year, month, temp) => {
+        let firstDay = new Date(year, month, 1).getDay();
+        if(month <= 0) {
+            year -= 1;
+            month = 11;
+        } 
+        let lastDay = new Date(year, month, 0).getDate();
+        for(let i = 0; i < firstDay; i++) {
+            temp.push(lastDay - firstDay + i + 1);
+        }
+        setDayArr([...dayArr, temp]);
+    }
+    const getNowDays = (year, month, temp) => {
+        let lastDay = new Date(year, month + 1, 0).getDate() + 1;
+        
+        for(let i = 1; i < lastDay; i++) {
+            temp.push(i);
+        }
+    }
+    const getNextDay = (temp) => {
+        for(let i = 1; i < 7; i++) {
+            if(temp.length % 7 !== 0) {
+                temp.push(i);
+                continue;
+            }
+            break;
+        }
+    }
+
+    const getCalendar = (year, month, day, date) => {
+        let day_arr = [];
+        getPrevDay(year, month, day_arr);
+        getNowDays(year, month, day_arr);
+        getNextDay(day_arr);
+
+        let calendar = day_arr.forEach((day, idx) => {
+            console.log(`day: ${day}, idx: ${idx}`);
+            <Row key={day * idx}>
+
+            </Row>
+        });
+    }
+
+    const makeCalender = (year, month, day) => {
         // 현재 월이 전년도나 내년으로 넘어가면 체크해줘야 함
         // {...} 로직 짜기
         
         let now_YMD_Obj = new Date(year, month, 1);
-        let leapYear = false;
-        // 4로 나눠도 0이고
-        // 100으로 나눌 때 0이 아님
-        // 400으로 나누면 0이어야 함
-        if(year % 4 === 0) {
-            if(year % 100 === 0 && year % 400 === 0) {
-                leapYear = true;
-            }
-        }
+        let leapYear = leapYearBool(year);
         
         let nowMonthDays = [];
         let cnt = 7 - now_YMD_Obj.getDay();
@@ -174,7 +229,7 @@ const Calender = ({date}) => {
             <Header>
                 <button onClick={prevMonthClick}>◀</button>
                 <span>
-                    {`${dayToKor[viewDay]} ${viewMonth}월 ${viewYear}년`}
+                    {`${viewYear}년 ${viewMonth + 1}월 ${viewDate}일 ${dayToKor[viewDay]}`}
                 </span>
                 <button onClick={nextMonthClick}>▶</button>
             </Header>

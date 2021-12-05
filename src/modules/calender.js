@@ -46,7 +46,7 @@ export default function reducer(state = initialState, action) {
         }
         case "calendar/NEXT_MONTH": {
             if(state.thisMonth >= 11) {
-                return {...state, thisMonth: state.thisMonth - 10, year: state.year + 1};
+                return {...state, thisMonth: state.thisMonth - 11, year: state.year + 1};
             }
             return {...state, thisMonth: state.thisMonth + 1};
         }
