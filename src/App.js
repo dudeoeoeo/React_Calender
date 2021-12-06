@@ -1,8 +1,5 @@
-import logo from './logo.svg';
 import './App.css';
 import Calender from './components/Calender';
-
-// const date = new Date();
 
 function App() {
   return (
