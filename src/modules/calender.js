@@ -8,7 +8,7 @@ const date = new Date();
 
 const initialState = {
     
-    thisMonth: date.getMonth(),
+    thisMonth: date.getMonth() < 10 ? '0' + date.getMonth() : date.getMonth(),
     year: date.getFullYear(),
     day: date.getDay(),
     date: date.getDate(),
@@ -39,14 +39,16 @@ export default function reducer(state = initialState, action) {
             return state;
         }
         case "calendar/PREV_MONTH": {
-            if(state.thisMonth <= 1) {
-                return {...state, thisMonth: state.thisMonth + 10, year: state.year - 1};
+            if(state.thisMonth <= 0) {
+                return {...state, thisMonth: 11, year: state.year - 1};
+                // return {...state, thisMonth: state.thisMonth + 10, year: state.year - 1};
             } 
             return {...state, thisMonth: state.thisMonth-1};
         }
         case "calendar/NEXT_MONTH": {
             if(state.thisMonth >= 11) {
-                return {...state, thisMonth: state.thisMonth - 11, year: state.year + 1};
+                return {...state, thisMonth: 0, year: state.year + 1};
+                // return {...state, thisMonth: state.thisMonth - 11, year: state.year + 1};
             }
             return {...state, thisMonth: state.thisMonth + 1};
         }

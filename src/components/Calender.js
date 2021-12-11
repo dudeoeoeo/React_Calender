@@ -5,6 +5,8 @@ import styled, { keyframes, css } from "styled-components";
 import { nextMonth, prevMonth } from "../modules/calender";
 import { schedule_add, schedule_update, schedule_delete } from '../modules/schedule';
 import Modal from './Modal';
+import BlackoutBody from './BlackoutBody';
+import ScheduleModal from './ScheduleModal';
 
 const date1 = new Date();
 const month31 = [4, 6, 9, 11];
@@ -49,13 +51,16 @@ const Calender = () => {
     const [viewDate, setViewDate] = useState();
     const [viewCalendar, setViewCalendar] = useState();
 
-    const [modalOpen, setModalOpen] = useState(false);
+    
+    const [reservationDate, setReservationDate] = useState();
+    const [isVisible, setIsVisible] = useState(false);
+    const onSetIsVisible = (active) => {
+        console.log("onSetIsVisible", active);
+        setIsVisible(active);
+    };
 
-    const modalClose = () => {
-        console.log("click")
-        setModalOpen(!modalOpen)
-        console.log("modal", modalOpen)
-    }
+    const [settingModal, setSettingModal] = useState(false);
+
     useEffect(() => {
         setViewYear(calendarDate.year);
         setViewMonth(calendarDate.thisMonth);
@@ -90,24 +95,29 @@ const Calender = () => {
         let firstDay = new Date(year, month, 1).getDay();
         if(month <= 0) {
             year -= 1;
-            month = 11;
-        } 
+            month = 12;
+        }
         let lastDay = new Date(year, month, 0).getDate();
         for(let i = 0; i < firstDay; i++) {
-            temp.push(lastDay - firstDay + i + 1);
+            temp.push(year + '-' + month + '-' + (lastDay - firstDay + i + 1));
         }
     }
     const getNowDays = (year, month, temp) => {
         let lastDay = new Date(year, month + 1, 0).getDate() + 1;
-        
+        month += 1;
         for(let i = 1; i < lastDay; i++) {
-            temp.push(i);
+            temp.push(year + '-' + month + '-' + i);
         }
     }
-    const getNextDay = (temp) => {
+    const getNextDay = (year, month, temp) => {
+        month += 2;
+        if(month >= 13) {
+            year += 1;
+            month = 1;
+        } 
         for(let i = 1; i < 7; i++) {
             if(temp.length % 7 !== 0) {
-                temp.push(i);
+                temp.push(year + '-' + month + '-' + i);
                 continue;
             }
             break;
@@ -130,44 +140,62 @@ const Calender = () => {
         let day_arr = [];
         getPrevDay(year, month, day_arr);
         getNowDays(year, month, day_arr);
-        getNextDay(day_arr);
+        getNextDay(year, month, day_arr);
         day_arr = divideArr(day_arr);
         let fontColorArr = ['red', 'black', 'black', 'black', 'black', 'black', 'blue'];
         let today_cnt = -new Date(calendarDate.year, calendarDate.thisMonth, 1).getDay();
-        schedules.map(s => console.log(s.date));
+        schedules.map(s => console.log("s.date",s.date));
         let calendar = day_arr.map((week, index) => {
             return (
                 <Row key={(week * week + index) / week}>
                     {week.map((day, idx) => {
                         today_cnt += 1;
                         return (
-                            <div style={{
-                                border: "1px solid black",
-                                backgroundImage: today_cnt === calendarDate.date ? `url(${today_chunsik})` : `url(${chunsik})`,
-                                backgroundSize: 'contain',
-                                backgroundPosition: 'center',
-                                backgroundRepeat: 'no-repeat',
-                                cursor: 'pointer',
-                                opacity: `${(index === 0 && day > 7) || (index > 3 && day < 7) ? 0.5 : 1}`,
-                            }}
-                            key={day + idx + today_cnt}
-                            onClick={modalClose}
+                            <div 
+                                style={{
+                                    border: "1px solid black",
+                                    backgroundImage: today_cnt === calendarDate.date ? `url(${today_chunsik})` : `url(${chunsik})`,
+                                    backgroundSize: 'contain',
+                                    backgroundPosition: 'center',
+                                    backgroundRepeat: 'no-repeat',
+                                    cursor: 'pointer',
+                                    opacity: `${(index === 0 && day.split('-')[2] > 7) || (index > 3 && day.split('-')[2] < 7) ? 0.5 : 1}`,
+                                }}
+                                key={`${day}-${idx}`}
+                                onClick={() => {
+                                    setReservationDate(day);
+                                    setIsVisible(true);
+                                }}
                             >
-                            { modalOpen && <Modal modalClose={modalClose} />}
                                 {(index === 0 && day > 7) || (index > 3 && day < 7) ? (
                                     <span style={{
                                         color: `${fontColorArr[idx]}`,
                                         opacity: 0.5
                                     }}
-                                    key={day + idx + idx}
-                                    >{day}</span>
+                                    key={day}
+                                    >{day.split('-')[2]}</span>
                                 ) : (
                                     <span style={{
                                         color: `${fontColorArr[idx]}`,
                                     }}
-                                    key={day + idx + idx}
-                                    >{day}</span>
+                                    key={day}
+                                    >{day.split('-')[2]}</span>
                                 )}
+                                {schedules
+                                    .filter(schedule => schedule.date === day)
+                                    .map((schedule) => {
+                                        return (
+                                            <div
+                                                style={scheduleStyle}
+                                                className={schedule.completed}
+                                                key={schedule.desc}
+                                                onClick={() => setIsVisible(true)}
+                                            >
+                                                <span>{`${schedule.desc.length > 7 ? schedule.desc.substr(0, 7)+'...' : schedule.desc}`}</span>
+                                            </div>
+                                        )
+                                    })
+                                }
                             </div>
                         )
                     })}
@@ -189,18 +217,27 @@ const Calender = () => {
             </Header>
             <Days>
                 <Day>
-                    <div key={0} style={{color: 'red'}}>일</div>
-                    <div key={1} style={{color: 'black'}}>월</div>
-                    <div key={2} style={{color: 'black'}}>화</div>
-                    <div key={3} style={{color: 'black'}}>수</div>
-                    <div key={4} style={{color: 'black'}}>목</div>
-                    <div key={5} style={{color: 'black'}}>금</div>
-                    <div key={6} style={{color: 'blue'}}>토</div>
+                    <div key={'sun'} style={{color: 'red'}}>일</div>
+                    <div key={'mon'} style={{color: 'black'}}>월</div>
+                    <div key={'tues'} style={{color: 'black'}}>화</div>
+                    <div key={'wen'} style={{color: 'black'}}>수</div>
+                    <div key={'thur'} style={{color: 'black'}}>목</div>
+                    <div key={'fri'} style={{color: 'black'}}>금</div>
+                    <div key={'sat'} style={{color: 'blue'}}>토</div>
                 </Day>
                     <br /><br />
                     {/* {makeCalender(viewYear, viewMonth)} */}
                     {/* {getCalendar(viewYear, viewMonth, viewDay, viewDate)} */}
                     {viewCalendar}
+                    {isVisible && <BlackoutBody onSetIsVisible={onSetIsVisible} />}
+                    {isVisible && (
+                        <ScheduleModal reservationDate={reservationDate} setIsVisible={setIsVisible} />
+                    )}
+
+                    {/* {settingModal && 
+                    <SettingWrapper>
+                        <Modal />asda
+                    </SettingWrapper>} */}
             </Days>
 
             <FloatBtn1 onClick={() => console.log("1번째 버튼 클릭")}>
@@ -217,7 +254,7 @@ const Container = styled.div`
   width: 100vw;
   height: 100vh;
   align-items: center;
-  /* justify-content:center; */
+//   justify-content:center;
   flex-direction: column;
   display: flex;
   font-size: 20px;
@@ -341,6 +378,13 @@ const FloatBtn2 = styled.button`
     width: auto;
     color: #bebddb;
   }
+`;
+
+const SettingWrapper = styled.div`
+    position: absolute; // fixed도 가능하다.
+    left: 40.0%;
+    z-index: 999;
+    top: 20%;
 `;
 
 export default Calender;

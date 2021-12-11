@@ -8,7 +8,7 @@ export const schedule_delete = (id) => ({type: SCHEDULE_DELETE});
 
 const initialState = {
     schedules: [
-        {id: 1, date: "2021-12-25", desc: "달력 만들기", completed: false},
+        {id: 1, date: "2021-12-25", desc: "맛있는거 먹으러 가기", completed: false},
         {id: 2, date: "2021-12-28", desc: "놀기", completed: true},
     ],
 };
