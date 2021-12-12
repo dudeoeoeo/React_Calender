@@ -1,8 +1,12 @@
 import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-const ScheduleModal = ({ reservationDate, setIsVisible }) => {
+const ScheduleModal = ({ reservationDate, setIsVisible, schedule_add, dispatch }) => {
     const textAreaRef = useRef(null);
+
+    // const dispatch = useDispatch();
+
+    const schedule_add_click = useCallback((date, time, desc) => dispatch(schedule_add(date, time, desc)), [schedule_add, dispatch]);
 
     const [timeValue, setTimeValue] = useState('');
     const [todo, setTodo] = useState('');
@@ -12,23 +16,10 @@ const ScheduleModal = ({ reservationDate, setIsVisible }) => {
     }, []);
     const textChange = useCallback((e) => {
         setTodo(e.target.value);
-    })
-
-    const [scheduleObj, setScheduleObj] = useState({
-        year: '',
-        time: '',
-        desc: '',
-        completed: false,
-    })
+    }, []);
 
     const onSubmitBtn = () => {
-        console.log("submit", reservationDate, timeValue, todo);
-        setScheduleObj({
-            year: reservationDate,
-            time: timeValue,
-            desc: todo,
-            completed: false,
-        });
+        schedule_add_click(reservationDate, timeValue, todo);
         setIsVisible(false);
     };
     return (

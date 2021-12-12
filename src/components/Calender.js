@@ -34,7 +34,7 @@ const Calender = () => {
     const calendarDate = useSelector(state => state.calendar);
     const schedules = useSelector(state => state.schedule.schedules);
     const dispatch = useDispatch();
-    console.log(schedules);
+    console.log("calender schedule: ",schedules);
     console.log(calendarDate);
     console.log(`month: ${state.calendar.thisMonth}, year: ${state.calendar.year}`);
     console.log("day: ", new Date().getDate(), new Date().getDay());
@@ -231,7 +231,12 @@ const Calender = () => {
                     {viewCalendar}
                     {isVisible && <BlackoutBody onSetIsVisible={onSetIsVisible} />}
                     {isVisible && (
-                        <ScheduleModal reservationDate={reservationDate} setIsVisible={setIsVisible} />
+                        <ScheduleModal 
+                            reservationDate={reservationDate} 
+                            setIsVisible={setIsVisible}
+                            schedule_add={schedule_add}  
+                            dispatch={dispatch}
+                        />
                     )}
 
                     {/* {settingModal && 
