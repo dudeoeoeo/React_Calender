@@ -34,16 +34,16 @@ const Calender = () => {
     const calendarDate = useSelector(state => state.calendar);
     const schedules = useSelector(state => state.schedule.schedules);
     const dispatch = useDispatch();
-    console.log("calender schedule: ",schedules);
-    console.log(calendarDate);
-    console.log(`month: ${state.calendar.thisMonth}, year: ${state.calendar.year}`);
-    console.log("day: ", new Date().getDate(), new Date().getDay());
+    // console.log("calender schedule: ",schedules);
+    // console.log(calendarDate);
+    // console.log(`month: ${state.calendar.thisMonth}, year: ${state.calendar.year}`);
+    // console.log("day: ", new Date().getDate(), new Date().getDay());
     const prevMonthClick = useCallback((month) => dispatch(prevMonth(month - 1)), [dispatch]);
     const nextMonthClick = useCallback((month) => dispatch(nextMonth(month + 1)), [dispatch]);
 
-    const addScheduleClick = useCallback((schedule) => dispatch(schedule_add(schedule.date, schedule.desc)));
-    const updateScheduleClick = useCallback((schedule) => dispatch(schedule_update(schedule.id, schedule.date, schedule.desc)));
-    const deleteScheduleClick = useCallback((schedule) => dispatch(schedule_delete(schedule.id)));
+    // const addScheduleClick = useCallback((schedule) => dispatch(schedule_add(schedule.date, schedule.desc)), [dispatch]);
+    // const updateScheduleClick = useCallback((schedule) => dispatch(schedule_update(schedule.id, schedule.date, schedule.desc)));
+    // const deleteScheduleClick = useCallback((schedule) => dispatch(schedule_delete(schedule.id)));
     
     const [viewYear, setViewYear] = useState();
     const [viewMonth, setViewMonth] = useState();
@@ -51,15 +51,13 @@ const Calender = () => {
     const [viewDate, setViewDate] = useState();
     const [viewCalendar, setViewCalendar] = useState();
 
-    
     const [reservationDate, setReservationDate] = useState();
     const [isVisible, setIsVisible] = useState(false);
+    const [schedule, setSchedule] = useState(null);
+    
     const onSetIsVisible = (active) => {
-        console.log("onSetIsVisible", active);
         setIsVisible(active);
     };
-
-    const [settingModal, setSettingModal] = useState(false);
 
     useEffect(() => {
         setViewYear(calendarDate.year);
@@ -72,25 +70,6 @@ const Calender = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch, state, calendarDate]);
 
-    const getDays = (month) => {
-        const temp = [];
-        if(month + 1 !== 2) {
-            const endDate = month31.indexOf(month+1) > -1 ? 31 : 30;
-            for(let i = 1; i < endDate + 1; i++) {
-                temp.push(i);
-            }
-        }
-        // setDays(temp);
-    }
-
-    const leapYearBool = (year) => {
-        if (year % 4 === 0) {
-            if (year % 100 === 0 && year % 400 === 0) {
-                return true;
-            }
-        }
-        return false;
-    }
     const getPrevDay = (year, month, temp) => {
         let firstDay = new Date(year, month, 1).getDay();
         if(month <= 0) {
@@ -144,7 +123,11 @@ const Calender = () => {
         day_arr = divideArr(day_arr);
         let fontColorArr = ['red', 'black', 'black', 'black', 'black', 'black', 'blue'];
         let today_cnt = -new Date(calendarDate.year, calendarDate.thisMonth, 1).getDay();
-        schedules.map(s => console.log("s.date",s.date));
+        const dateArr = [];
+
+        if(Array.isArray(schedules) && schedules.length > 0) 
+            schedules.map(s => dateArr.push(s.date));
+
         let calendar = day_arr.map((week, index) => {
             return (
                 <Row key={(week * week + index) / week}>
@@ -163,6 +146,9 @@ const Calender = () => {
                                 }}
                                 key={`${day}-${idx}`}
                                 onClick={() => {
+                                    if (dateArr.indexOf(day) === -1) {
+                                        setSchedule(null);
+                                    }
                                     setReservationDate(day);
                                     setIsVisible(true);
                                 }}
@@ -181,7 +167,8 @@ const Calender = () => {
                                     key={day}
                                     >{day.split('-')[2]}</span>
                                 )}
-                                {schedules
+                                {Array.isArray(schedules) &&
+                                    schedules
                                     .filter(schedule => schedule.date === day)
                                     .map((schedule) => {
                                         return (
@@ -189,9 +176,15 @@ const Calender = () => {
                                                 style={scheduleStyle}
                                                 className={schedule.completed}
                                                 key={schedule.desc}
-                                                onClick={() => setIsVisible(true)}
                                             >
-                                                <span>{`${schedule.desc.length > 7 ? schedule.desc.substr(0, 7)+'...' : schedule.desc}`}</span>
+                                                <span 
+                                                    onClick={() => {
+                                                        setSchedule(schedule);
+                                                        setIsVisible(true);
+                                                    }}
+                                                >
+                                                    {`${schedule.desc.length > 7 ? schedule.desc.substr(0, 7)+'...' : schedule.desc}`}
+                                                </span>
                                             </div>
                                         )
                                     })
@@ -203,7 +196,6 @@ const Calender = () => {
             )
         });
         setViewCalendar(calendar);
-        // return calendar;
     }
 
     return (
@@ -226,8 +218,6 @@ const Calender = () => {
                     <div key={'sat'} style={{color: 'blue'}}>토</div>
                 </Day>
                     <br /><br />
-                    {/* {makeCalender(viewYear, viewMonth)} */}
-                    {/* {getCalendar(viewYear, viewMonth, viewDay, viewDate)} */}
                     {viewCalendar}
                     {isVisible && <BlackoutBody onSetIsVisible={onSetIsVisible} />}
                     {isVisible && (
@@ -235,14 +225,13 @@ const Calender = () => {
                             reservationDate={reservationDate} 
                             setIsVisible={setIsVisible}
                             schedule_add={schedule_add}  
+                            schedule_update={schedule_update}
+                            schedule_delete={schedule_delete}
                             dispatch={dispatch}
+                            scheduleObj={schedule}
+                            len={schedules.length}
                         />
                     )}
-
-                    {/* {settingModal && 
-                    <SettingWrapper>
-                        <Modal />asda
-                    </SettingWrapper>} */}
             </Days>
 
             <FloatBtn1 onClick={() => console.log("1번째 버튼 클릭")}>
