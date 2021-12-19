@@ -2,9 +2,10 @@ const SCHEDULE_ADD = "schedule/SCHEDULE_ADD";
 const SCHEDULE_UPDATE = "schedule/SCHEDULE_UPDATE";
 const SCHEDULE_DELETE = "schedule/SCHEDULE_DELETE";
 
-export const schedule_add = (date, time, desc) => ({type: SCHEDULE_ADD, date: date, time: time, desc: desc});
-export const schedule_update = (id, date, desc) => ({type: SCHEDULE_UPDATE, date: date, desc: desc});
-export const schedule_delete = (id) => ({type: SCHEDULE_DELETE});
+export const schedule_add = (newSchedule) => ({type: SCHEDULE_ADD, newSchedule: newSchedule});
+// export const schedule_add = (date, time, desc) => ({type: SCHEDULE_ADD, date: date, time: time, desc: desc});
+export const schedule_update = (newSchedule) => ({type: SCHEDULE_UPDATE, newSchedule: newSchedule});
+export const schedule_delete = (id) => ({type: SCHEDULE_DELETE, id: id});
 
 const initialState = {
     schedules: [
@@ -14,22 +15,27 @@ const initialState = {
 };
 
 function schedule(state = initialState, action) {
-    console.log("schedule: ", state, ", action: ", action);
     switch (action.type) {
         case SCHEDULE_ADD:
-            return {...state, date: action.date, time: action.time, desc: action.desc, completed: false};
+            // return {...state, date: action.date, time: action.time, desc: action.desc, completed: false};
+            // return {...state, schedules: state.schedules.push(state.schedules.length, action.date, action.time, action.desc, false)};
+            return {...state, schedules: state.schedules.concat(action.newSchedule)};
         case SCHEDULE_UPDATE:
             return {
                 ...state, 
                 schedules: state.schedules.map(schedule => 
-                    schedule.id === action.id ? {...schedule, date: action.date, desc: state.desc, completed: state.completed} : schedule
+                    schedule.id === action.newSchedule.id ? 
+                    {
+                        ...schedule,
+                        date: action.newSchedule.date, 
+                        time:action.newSchedule.time, 
+                        desc: action.newSchedule.desc, 
+                        completed: action.newSchedule.completed
+                    } : schedule
                 )
             };
         case SCHEDULE_DELETE:
-            return {
-                ...state,
-                schedules: state.schedules.filter(schedule => schedule.id !== action.id)
-            }
+            return { ...state, schedules: state.schedules.filter(schedule => schedule.id !== action.id)};
         default:
             return state;
     }
